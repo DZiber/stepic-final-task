@@ -1,3 +1,5 @@
+from accessify import private
+
 from .base_page import BasePage
 from .locators import ProductPageLocators
 
@@ -7,10 +9,14 @@ class ProductPage(BasePage):
         add_to_basket = self.browser.find_element(*ProductPageLocators.ADD_TO_BASKET)
         add_to_basket.click()
 
-    def check_adding_to_basket(self):
-        expected_text = "The shellcoder\'s handbook has been added to your basket.\n" \
-                        "Your basket now qualifies for the Deferred benefit offer offer.\n" \
-                        "Your basket total is now £9.99"
-        messages_text = self.browser.find_element(*ProductPageLocators.MESSAGES).text.replace("×\n", "").replace("\nView basket Checkout now", "")
-        assert messages_text == expected_text, "Wrong message!"
+    def check_success_adding_message(self, expected_book_name):
+        actual_book_name = self.get_bold_text(*ProductPageLocators.SUCCESS_MESSAGE)
+        assert actual_book_name == expected_book_name, "Wrong book name!"
 
+    def check_cart_total_message(self, expected_price):
+        actual_price = self.get_bold_text(*ProductPageLocators.TOTAL_MESSAGE)
+        assert actual_price[1:] == expected_price, "Wrong book price!"  # удаление первого символа для независимости локализации, можно удалить если проверка символа валюты необходима
+
+    @private
+    def get_bold_text(self, by, locator):
+        return self.browser.find_element(by, locator).find_element_by_tag_name("strong").text

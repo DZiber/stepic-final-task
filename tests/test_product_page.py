@@ -7,4 +7,5 @@ def test_guest_can_add_product_to_basket(browser):
     product_page.open()
     product_page.add_to_basket()
     product_page.solve_quiz_and_get_code()
-    product_page.check_adding_to_basket()
+    product_page.check_success_adding_message("Coders at Work")
+    product_page.check_cart_total_message("19.99")
