@@ -15,8 +15,17 @@ class ProductPage(BasePage):
 
     def check_cart_total_message(self, expected_price):
         actual_price = self.get_bold_text(*ProductPageLocators.TOTAL_MESSAGE)
-        assert actual_price[1:] == expected_price, "Wrong book price!"  # удаление первого символа для независимости локализации, можно удалить если проверка символа валюты необходима
+        assert actual_price[1:] == expected_price, "Wrong book price!" \
+        # удаление первого символа для независимости локализации, можно удалить если проверка символа валюты необходима
 
     @private
     def get_bold_text(self, by, locator):
         return self.browser.find_element(by, locator).find_element_by_tag_name("strong").text
+
+    def should_not_be_success_message(self):
+        assert self.is_not_element_present(*ProductPageLocators.SUCCESS_MESSAGE), \
+            "Success message is presented, but should not be"
+
+    def should_disappear_success_message(self):
+        assert self.is_disappeared(*ProductPageLocators.SUCCESS_MESSAGE), \
+           "Success message is presented, but should disappear"
