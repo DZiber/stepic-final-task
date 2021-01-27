@@ -5,6 +5,10 @@ from .locators import ProductPageLocators
 
 
 class ProductPage(BasePage):
+    @private
+    def get_bold_text(self, by, locator):
+        return self.browser.find_element(by, locator).find_element_by_tag_name("strong").text
+
     def add_to_basket(self):
         add_to_basket = self.browser.find_element(*ProductPageLocators.ADD_TO_BASKET)
         add_to_basket.click()
@@ -17,10 +21,6 @@ class ProductPage(BasePage):
         actual_price = self.get_bold_text(*ProductPageLocators.TOTAL_MESSAGE)
         assert actual_price[1:] == expected_price, "Wrong book price!" \
         # удаление первого символа для независимости локализации, можно удалить если проверка символа валюты необходима
-
-    @private
-    def get_bold_text(self, by, locator):
-        return self.browser.find_element(by, locator).find_element_by_tag_name("strong").text
 
     def should_not_be_success_message(self):
         assert self.is_not_element_present(*ProductPageLocators.SUCCESS_MESSAGE), \
