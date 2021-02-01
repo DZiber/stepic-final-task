@@ -1,29 +1,38 @@
 import pytest
-
+import time
 import pages.links as links
+
 from pages.basket_page import BasketPage
 from pages.login_page import LoginPage
+from pages.main_page import MainPage
 from pages.product_page import ProductPage
 
 
-@pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer3",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer4",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer5",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer6",
-                                  pytest.param(
-                                      "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer7",
-                                      marks=pytest.mark.xfail),
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"])
-def test_guest_can_add_product_to_basket(browser, link):
+@pytest.mark.parametrize('link',
+                             ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer3",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer4",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer5",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer6",
+                              pytest.param(
+                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer7",
+                                  marks=pytest.mark.xfail),
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"])
+def test_guest_can_add_product_to_basket(self, browser, link):
     product_page = ProductPage(browser, link)
     product_page.open()
     product_page.add_to_basket()
     product_page.check_success_adding_message("Coders at Work")
     product_page.check_cart_total_message("19.99")
+
+
+def test_guest_cant_see_success_message(self, browser):
+    product_page = ProductPage(browser, links.PRODUCT_PAGE_LINK)
+    product_page.open()
+    product_page.should_not_be_success_message()
 
 
 @pytest.mark.xfail(reason="Failed according to task")
@@ -71,3 +80,29 @@ def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     basket_page.should_not_be_products()
     basket_page.should_be_message_about_emptiness("Your basket is empty. Continue shopping") \
         # only english: https://stepik.org/lesson/201964/step/10?auth=login&discussion=1057515&reply=1057527&unit=176022
+
+
+@pytest.mark.user_tests
+class TestUserAddToBasketFromProductPage():
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        page = MainPage(browser, links.MAIN_PAGE_LINK)
+        page.open()
+        page.go_to_login_page()
+        login_page = LoginPage(browser, browser.current_url)
+        login_page.should_be_login_page()
+        email = str(time.time()) + "@faketestmail.com"
+        login_page.register_new_user(email, "test12345")
+        page.should_be_authorized_user()
+
+    def test_user_cant_see_success_message(self, browser):
+        product_page = ProductPage(browser, links.PRODUCT_PAGE_LINK)
+        product_page.open()
+        product_page.should_not_be_success_message()
+
+    def test_user_can_add_product_to_basket(self, browser):
+        product_page = ProductPage(browser, links.PRODUCT_PAGE_LINK)
+        product_page.open()
+        product_page.add_to_basket()
+        product_page.check_success_adding_message("Coders at Work")
+        product_page.check_cart_total_message("19.99")
