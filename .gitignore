@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Requirements
-requirements.txt
+# IDE files
+.idea/
